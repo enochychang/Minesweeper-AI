@@ -23,7 +23,7 @@
 #define MINE_SWEEPER_CPP_SHELL_MANUALAI_HPP
 
 #include "Agent.hpp"
-#include<iostream>
+#include <iostream>
 
 class ManualAI : public Agent
 {
@@ -33,10 +33,12 @@ public:
         rowDimension = _rowDimension;
         colDimension = _colDimension;
         totalMines   = _totalMines;
+        //std::cout << _agentX << " " << _agentY << std::endl;
     };
 
     Action getAction( int number ) override
     {
+    
         // Print Command Menu
         std::cout << "---------------- Available Actions ----------------" << std::endl;
         std::cout << "L: leave game   U: uncover tile   F: flag   N: unflag" << std::endl;

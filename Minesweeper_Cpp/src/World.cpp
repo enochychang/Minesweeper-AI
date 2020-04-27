@@ -102,6 +102,10 @@ World::~World() {
         delete [] board[index];
 
     delete [] board;
+  
+  //MEM LEAK FIX - CHANGE FROM PIAZZA
+  delete agent;
+  
 }
 
 // ===============================================================

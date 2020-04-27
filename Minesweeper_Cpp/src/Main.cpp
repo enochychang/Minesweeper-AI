@@ -63,7 +63,7 @@ int main( int argc, char *argv[] )
         if (score)
             cout << "WORLD COMPLETE" << endl;
         else
-            cout <<  "WORLD INCOMPLETE" << endl;
+            cout <<  "WORLD INCOMPLETE1" << endl;
         return 0;
     }
 
@@ -129,7 +129,7 @@ int main( int argc, char *argv[] )
         if (score)
             cout << "WORLD COMPLETE" << endl;
         else
-            cout <<  "WORLD INCOMPLETE" << endl;
+            cout <<  "WORLD INCOMPLETE2" << endl;
         return 0;
     }
 
@@ -217,7 +217,7 @@ int main( int argc, char *argv[] )
             if (score)
                 cout << "WORLD COMPLETE" << endl;
             else
-                cout <<  "WORLD INCOMPLETE" << endl;
+                cout <<  "WORLD INCOMPLETE3" << endl;
         }
         else
         {
@@ -226,7 +226,7 @@ int main( int argc, char *argv[] )
             if (score)
                 file << "WORLD COMPLETE" << endl;
             else
-                file <<  "WORLD INCOMPLETE"  << endl;
+                file <<  "WORLD INCOMPLETE4"  << endl;
             file.close();
         }
     }
@@ -236,3 +236,5 @@ int main( int argc, char *argv[] )
     }
     return 0;
 }
+
+//edited WORLD INCOMPLETE error message to have numbers 1-4

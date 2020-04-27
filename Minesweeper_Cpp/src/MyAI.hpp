@@ -26,6 +26,8 @@
 #include <map>
 #include <set>
 #include <algorithm>
+  
+#include <string>
 
 using namespace std;
 
@@ -40,9 +42,29 @@ public:
     // ======================================================================
     // YOUR CODE BEGINS
     // ======================================================================
+    vector<vector<string>> board;
+    void printBoard();
+  
+    vector<vector<int>> safe;
+    vector<vector<int>> safeUncovered;
+  
+    int startingX;
+    int startingY;
+  
+    vector<vector<int>> frontier;
+    vector<int> frontierNum;
+  
+    int mineCount;
+  
+    vector<vector<int>> flagThese;
 
-
-
+  
+    
+    int coveredTilesLeft;
+  
+  
+    bool zero;
+    
     // ======================================================================
     // YOUR CODE ENDS
     // ======================================================================
