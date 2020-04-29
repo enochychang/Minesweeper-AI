@@ -58,7 +58,7 @@ public:
   
     vector<vector<int>> flagThese;
 
-  
+    //donezo
     
     int coveredTilesLeft;
   
