@@ -48,6 +48,12 @@ public:
     vector<vector<int>> safe;
     vector<vector<int>> safeUncovered;
   
+    /* 
+    
+    <   < > < > < >                             >
+    
+    */
+  
     int startingX;
     int startingY;
   
@@ -57,8 +63,12 @@ public:
     int mineCount;
   
     vector<vector<int>> flagThese;
-
-    //donezo
+    
+    vector<vector<int>> bNeighborhood;
+    vector<vector<int>> unmarkedNeighbors;
+  
+  
+  //
     
     int coveredTilesLeft;
   
