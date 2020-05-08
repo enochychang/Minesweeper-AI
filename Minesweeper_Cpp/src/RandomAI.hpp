@@ -28,6 +28,7 @@ public:
 
     Action getAction( int number) override
     {
+        
         return{actions[rand() % 4], rand() % rowDimension, rand() % colDimension};
     }
 
