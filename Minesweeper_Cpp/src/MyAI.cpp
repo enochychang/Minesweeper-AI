@@ -79,7 +79,8 @@ Agent::Action MyAI::getAction( int number )
 //       return {FLAG, x , y };
 //     }
 
-  
+
+  /* 
                         //easy logic
                       if (mineCount == totalMines) {
                         //uncover everything else (add them to safe) 
@@ -105,6 +106,7 @@ Agent::Action MyAI::getAction( int number )
 
 
                       }
+                      */
   
   
     //part 2
@@ -580,168 +582,61 @@ Agent::Action MyAI::getAction( int number )
     }
   
   
+  
+  
+  
+  
 //END OF SUBMISSION 1 
   
     //effective label calculations
-//     //EffectiveLabel(x) = Label(x) – NumMarkedNeighbors(x)
-//     while (bNeighborhood.size() != 0) {
+    //EffectiveLabel(x) = Label(x) – NumMarkedNeighbors(x)
+    while (bNeighborhood.size() != 0) {
       
-//       int sz = bNeighborhood.size();
-//       int x = bNeighborhood.at(sz - 1).at(0);
-//       int y = bNeighborhood.at(sz - 1).at(1);
+      int sz = bNeighborhood.size();
+      int x = bNeighborhood.at(sz - 1).at(0);
+      int y = bNeighborhood.at(sz - 1).at(1);
       
-//       //number at x y
-//       //board stores strings         so we convert it to int later
-//       string labelStr = board.at(y).at(x);
+      //number at x y
+      //board stores strings         so we convert it to int later
+      string labelStr = board.at(y).at(x);
       
-//       //these values have a relevant Label value
-//       if (labelStr != "0" && labelStr != "*" && labelStr != "B") {
+      //these values have a relevant Label value
+      if (labelStr != "0" && labelStr != "*" && labelStr != "B") {
         
-//           //label num
-//           int label = stoi(labelStr);
+          //label num
+          int label = stoi(labelStr);
+          
         
-//           //find numMarkedNeighbors
-//           //vector<vector<int>> unmarkedNeighbors;
-//           vector<int> temp;
-        
-//           int numMarkedNeighbors = 0;
-        
+          int effectiveLabel = effectiveLabelCalc(label, x, y);
+          //find numMarkedNeighbors
+          //vector<vector<int>> unmarkedNeighbors;
 
-//           int effectiveLabel = 0;
-//           int sz1 = 0;
-//           int x1 = -1;
-//           int y1 = -1;
-//           // - if EffectiveLabel(x) = NumUnMarkedNeighbors(x), then all UnMarkedNeighbors(x) must be mines (mark them as
-//           // such on the board; this is likely to reduce effective labels of other nearby uncovered tiles, 
-//           // so that the rules-of-thumb can be fired again)
+            // - if EffectiveLabel(x) = 0, then all UnMarkedNeighbors(x) must be safe (you can UNCOVER them)
+            if (effectiveLabel == 0) {
+              vector<int> temp;
+              int sz;
 
-//           //label remains the same (int label)
-//           //do {  
-                    
-//                                                     if (y + 1 < colDimension) {
+              while (unmarkedNeighbors.size() != 0) {
 
-//                                                       if (board.at(y + 1).at(x) == "B") {
-//                                                         numMarkedNeighbors++;
-//                                                       }
-
-//                                                       if (board.at(y + 1).at(x) == "*") {
-//                                                         temp.push_back(x);
-//                                                         temp.push_back(y+1);
-//                                                         //we don't have to check if we already pushed back the same value 
-//                                                         //into unmarkedNeighbors because we are going to clear it at the end of the loop
-//                                                         unmarkedNeighbors.push_back(temp);
-//                                                         temp.clear();
-//                                                       }
-
-//                                                     }
-//                                                     if (y - 1 >= 0) {
-//                                                       if (board.at(y - 1).at(x) == "B") {
-//                                                         numMarkedNeighbors++;
-//                                                       }
-//                                                       if (board.at(y - 1).at(x) == "*") {
-//                                                         temp.push_back(x);
-//                                                         temp.push_back(y-1);
-//                                                         unmarkedNeighbors.push_back(temp);
-//                                                         temp.clear();
-//                                                       }
-//                                                     }
-//                                                     if (x - 1 >= 0) {
-//                                                       if (board.at(y).at(x - 1) == "B") {
-//                                                         numMarkedNeighbors++;
-//                                                       }
-//                                                       if (board.at(y).at(x - 1) == "*") {
-//                                                         temp.push_back(x-1);
-//                                                         temp.push_back(y);
-//                                                         unmarkedNeighbors.push_back(temp);
-//                                                         temp.clear();
-//                                                       }
-
-//                                                       if (y + 1 < colDimension) {
-//                                                         if (board.at(y + 1).at(x - 1) == "B") {
-//                                                           numMarkedNeighbors++;
-//                                                         }
-//                                                         if (board.at(y + 1).at(x - 1) == "*") {
-//                                                           temp.push_back(x-1);
-//                                                           temp.push_back(y+1);
-//                                                           unmarkedNeighbors.push_back(temp);
-//                                                           temp.clear();
-//                                                         }
-//                                                       }
-//                                                       if (y - 1 >= 0) {
-//                                                         if (board.at(y - 1).at(x - 1) == "B") {
-//                                                           numMarkedNeighbors++;
-//                                                         }
-//                                                         if (board.at(y - 1).at(x - 1) == "*") {
-//                                                           temp.push_back(x-1);
-//                                                           temp.push_back(y-1);
-//                                                           unmarkedNeighbors.push_back(temp);
-//                                                           temp.clear();
-//                                                         }
-//                                                       }
-//                                                     }
-//                                                     if (x + 1 < rowDimension) {
-//                                                       if (board.at(y).at(x + 1) == "B") {
-//                                                         numMarkedNeighbors++;
-//                                                       }
-//                                                       if (board.at(y).at(x + 1) == "*") {
-//                                                         temp.push_back(x+1);
-//                                                         temp.push_back(y);
-//                                                         unmarkedNeighbors.push_back(temp);
-//                                                         temp.clear();
-//                                                       }
-
-//                                                       if (y + 1 < colDimension) {
-//                                                         if (board.at(y + 1).at(x + 1) == "B") {
-//                                                           numMarkedNeighbors++;
-//                                                         }
-//                                                         if (board.at(y + 1).at(x + 1) == "*") {
-//                                                           temp.push_back(x+1);
-//                                                           temp.push_back(y+1);
-//                                                           unmarkedNeighbors.push_back(temp);
-//                                                           temp.clear();
-//                                                         }
-
-//                                                       }
-//                                                       if (y - 1 >= 0) {
-//                                                         if (board.at(y - 1).at(x + 1) == "B") {
-//                                                           numMarkedNeighbors++;
-//                                                         }
-//                                                         if (board.at(y - 1).at(x + 1) == "*") {
-//                                                           temp.push_back(x+1);
-//                                                           temp.push_back(y-1);
-//                                                           unmarkedNeighbors.push_back(temp);
-//                                                           temp.clear();
-//                                                         }
-//                                                       }
-//                                                     }
-            
-//             effectiveLabel = label - numMarkedNeighbors;
-//             // - if EffectiveLabel(x) = 0, then all UnMarkedNeighbors(x) must be safe (you can UNCOVER them)
-//             if (effectiveLabel == 0) {
-//               vector<int> temp;
-//               int sz;
-
-//               while (unmarkedNeighbors.size() != 0) {
-
-//                 sz = unmarkedNeighbors.size();
-//                 temp.push_back(unmarkedNeighbors.at(sz-1).at(0));
-//                 temp.push_back(unmarkedNeighbors.at(sz-1).at(1));
+                sz = unmarkedNeighbors.size();
+                temp.push_back(unmarkedNeighbors.at(sz-1).at(0));
+                temp.push_back(unmarkedNeighbors.at(sz-1).at(1));
                 
-//                 //if not already known as safe
-//                 if (find(safeUncovered.begin(), safeUncovered.end(), temp) == safeUncovered.end()) {
-//                   safe.push_back(temp);
-//                   safeUncovered.push_back(temp);
-//                 }
+                //if not already known as safe
+                if (find(safeUncovered.begin(), safeUncovered.end(), temp) == safeUncovered.end()) {
+                  safe.push_back(temp);
+                  safeUncovered.push_back(temp);
+                }
 
-//                 unmarkedNeighbors.pop_back();
-//               }
-//               //unmarkedNeighbors should be cleared if this loop is executed
-//             }
-//             //
+                unmarkedNeighbors.pop_back();
+              }
+              //unmarkedNeighbors should be cleared if this loop is executed
+            }
+            //
             
-//             // - if EffectiveLabel(x) = NumUnMarkedNeighbors(x), then all UnMarkedNeighbors(x) must be mines (mark them as
-//             // such on the board; this is likely to reduce effective labels of other nearby uncovered tiles, 
-//             // so that the rules-of-thumb can be fired again)
+            // - if EffectiveLabel(x) = NumUnMarkedNeighbors(x), then all UnMarkedNeighbors(x) must be mines (mark them as
+            // such on the board; this is likely to reduce effective labels of other nearby uncovered tiles, 
+            // so that the rules-of-thumb can be fired again)
 //             else if (effectiveLabel == numMarkedNeighbors) {
 //                               //                               sz1 = 0;
 //                               //                               x1 = -1;
@@ -843,28 +738,146 @@ Agent::Action MyAI::getAction( int number )
 
 //               }
                 
-//           //} while (effectiveLabel == numMarkedNeighbors && effectiveLabel != 0);
+          //} while (effectiveLabel == numMarkedNeighbors && effectiveLabel != 0);
         
 
           
-//         }
+        }
       
       
-//             unmarkedNeighbors.clear();
+            unmarkedNeighbors.clear();
 
 
-//             // The ABOVE is likely to reduce effective labels of other nearby uncovered tiles, 
-//             // so that the rules-of-thumb can be fired again)
-//             // if (effectiveLabel != numMarkedNeighbors) {
-//             //   bNeighborhood.pop_back();
-//             // }
-//             bNeighborhood.pop_back();
+            // The ABOVE is likely to reduce effective labels of other nearby uncovered tiles, 
+            // so that the rules-of-thumb can be fired again)
+            // if (effectiveLabel != numMarkedNeighbors) {
+            //   bNeighborhood.pop_back();
+            // }
+            bNeighborhood.pop_back();
 
-//     }
+    }
 
 }
 
+//calculates effective label given label and x y coordinate
+int MyAI::effectiveLabelCalc(int label, int x1, int y1) {
+          vector<int> temp;
+        
+          int numMarkedNeighbors = 0;
+        
 
+          int effectiveLabel = 0;
+          // int sz1 = 0;
+          // int x1 = -1;
+          // int y1 = -1;
+          // - if EffectiveLabel(x) = NumUnMarkedNeighbors(x), then all UnMarkedNeighbors(x) must be mines (mark them as
+          // such on the board; this is likely to reduce effective labels of other nearby uncovered tiles, 
+          // so that the rules-of-thumb can be fired again)
+
+          //label remains the same (int label)
+          //do {  
+                    
+                                                    if (y1 + 1 < colDimension) {
+
+                                                      if (board.at(y1 + 1).at(x1) == "B") {
+                                                        numMarkedNeighbors++;
+                                                      }
+
+                                                      if (board.at(y1 + 1).at(x1) == "*") {
+                                                        temp.push_back(x1);
+                                                        temp.push_back(y1+1);
+                                                        //we don't have to check if we already pushed back the same value 
+                                                        //into unmarkedNeighbors because we are going to clear it at the end of the loop
+                                                        unmarkedNeighbors.push_back(temp);
+                                                        temp.clear();
+                                                      }
+
+                                                    }
+                                                    if (y1 - 1 >= 0) {
+                                                      if (board.at(y1 - 1).at(x1) == "B") {
+                                                        numMarkedNeighbors++;
+                                                      }
+                                                      if (board.at(y1 - 1).at(x1) == "*") {
+                                                        temp.push_back(x1);
+                                                        temp.push_back(y1-1);
+                                                        unmarkedNeighbors.push_back(temp);
+                                                        temp.clear();
+                                                      }
+                                                    }
+                                                    if (x1 - 1 >= 0) {
+                                                      if (board.at(y1).at(x1 - 1) == "B") {
+                                                        numMarkedNeighbors++;
+                                                      }
+                                                      if (board.at(y1).at(x1 - 1) == "*") {
+                                                        temp.push_back(x1-1);
+                                                        temp.push_back(y1);
+                                                        unmarkedNeighbors.push_back(temp);
+                                                        temp.clear();
+                                                      }
+
+                                                      if (y1 + 1 < colDimension) {
+                                                        if (board.at(y1 + 1).at(x1 - 1) == "B") {
+                                                          numMarkedNeighbors++;
+                                                        }
+                                                        if (board.at(y1 + 1).at(x1 - 1) == "*") {
+                                                          temp.push_back(x1-1);
+                                                          temp.push_back(y1+1);
+                                                          unmarkedNeighbors.push_back(temp);
+                                                          temp.clear();
+                                                        }
+                                                      }
+                                                      if (y1 - 1 >= 0) {
+                                                        if (board.at(y1 - 1).at(x1 - 1) == "B") {
+                                                          numMarkedNeighbors++;
+                                                        }
+                                                        if (board.at(y1 - 1).at(x1 - 1) == "*") {
+                                                          temp.push_back(x1-1);
+                                                          temp.push_back(y1-1);
+                                                          unmarkedNeighbors.push_back(temp);
+                                                          temp.clear();
+                                                        }
+                                                      }
+                                                    }
+                                                    if (x1 + 1 < rowDimension) {
+                                                      if (board.at(y1).at(x1 + 1) == "B") {
+                                                        numMarkedNeighbors++;
+                                                      }
+                                                      if (board.at(y1).at(x1 + 1) == "*") {
+                                                        temp.push_back(x1+1);
+                                                        temp.push_back(y1);
+                                                        unmarkedNeighbors.push_back(temp);
+                                                        temp.clear();
+                                                      }
+
+                                                      if (y1 + 1 < colDimension) {
+                                                        if (board.at(y1 + 1).at(x1 + 1) == "B") {
+                                                          numMarkedNeighbors++;
+                                                        }
+                                                        if (board.at(y1 + 1).at(x1 + 1) == "*") {
+                                                          temp.push_back(x1+1);
+                                                          temp.push_back(y1+1);
+                                                          unmarkedNeighbors.push_back(temp);
+                                                          temp.clear();
+                                                        }
+
+                                                      }
+                                                      if (y1 - 1 >= 0) {
+                                                        if (board.at(y1 - 1).at(x1 + 1) == "B") {
+                                                          numMarkedNeighbors++;
+                                                        }
+                                                        if (board.at(y1 - 1).at(x1 + 1) == "*") {
+                                                          temp.push_back(x1+1);
+                                                          temp.push_back(y1-1);
+                                                          unmarkedNeighbors.push_back(temp);
+                                                          temp.clear();
+                                                        }
+                                                      }
+                                                    }
+            
+            effectiveLabel = label - numMarkedNeighbors;
+  
+  return effectiveLabel;
+}
 
 
 

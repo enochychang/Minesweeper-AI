@@ -67,7 +67,8 @@ public:
     vector<vector<int>> bNeighborhood;
     vector<vector<int>> unmarkedNeighbors;
   
-  
+
+  int effectiveLabelCalc(int label, int x1, int y1);
   //
     
     int coveredTilesLeft;
