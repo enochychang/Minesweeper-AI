@@ -26,8 +26,10 @@
 #include <map>
 #include <set>
 #include <algorithm>
-  
+#include <random>
 #include <string>
+
+  #include <time.h>
 
 using namespace std;
 
@@ -67,8 +69,10 @@ public:
     vector<vector<int>> bNeighborhood;
     vector<vector<int>> unmarkedNeighbors;
   
-
+//returns effective label BUT updates correct unmarkedNeighbors
   int effectiveLabelCalc(int label, int x1, int y1);
+  
+  bool neighborBomb(int x1, int y1);
   //
     
     int coveredTilesLeft;
@@ -76,6 +80,7 @@ public:
   
     bool zero;
     
+  bool checkifanystars();
     // ======================================================================
     // YOUR CODE ENDS
     // ======================================================================
