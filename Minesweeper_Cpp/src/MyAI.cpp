@@ -29,31 +29,56 @@ MyAI::MyAI ( int _rowDimension, int _colDimension, int _totalMines, int _agentX,
     totalMines = _totalMines ;
     agentX = _agentX;
     agentY = _agentY;
-    
+   // cout << rowDimension << " " << colDimension << endl;
+
     startingX = agentX;
     startingY = agentY;
+ 
+       vector<int> t = {agentX, agentY};
+       safeUncovered.push_back(t);
+   
+   
     
-    vector<int> t = {agentX, agentY};
-    safeUncovered.push_back(t);
+    
+    
   
-    //initially all positions set to 9 (9 == COVERED)
+    //initially all positions set to * (* == COVERED)
+
     vector<vector<string>> tempBoard(rowDimension, vector<string>(colDimension, "*"));
-                                 
     board = tempBoard;
+   
+                                 
+    
     
     mineCount = 0;
   
     coveredTilesLeft = rowDimension * colDimension;
-  
+ 
     //board.at(agentY).at(agentX) = "0";
+    
 
     // ======================================================================
     // YOUR CODE ENDS
     // ======================================================================
+    //printBoard();
 };
+
+double total_time_elapsed = 0.0;
 
 Agent::Action MyAI::getAction( int number )
 {
+  //cout << agentX << " " << agentY << endl;
+
+  double remaining_time = 300.0 - total_time_elapsed;
+  //3 min
+  if (remaining_time < 1.0) {
+    return {LEAVE,-1,-1};
+  }
+  else {
+    
+    time_t start = time(0);
+
+
     // ======================================================================
     // YOUR CODE BEGINS
     // ======================================================================
@@ -63,7 +88,7 @@ Agent::Action MyAI::getAction( int number )
   //python3 WorldGenerator.py [numFiles] [filename] [rowDimension] [colDimension][numMines]
   //python3 WorldGenerator.py 1 easyN 5 5 1
   //python3 WorldGenerator.py 1 begin 8 8 10
-//We can make the program run these worlds by ./bin/Minesweeper -f /app/WorldGenerator/Problems/begin1.txt
+//We can make the program run these worlds by ./bin/Minesweeper -f /app/WorldGenerator/Problems/Beginner_world_1.txt
 //Easy1.txt is a 5x5 world with 1 bomb
     
 //     if (flagThese.size() != 0) {
@@ -130,7 +155,6 @@ Agent::Action MyAI::getAction( int number )
       } 
     }
   
-
   
     //part 1
     //to prevent -1s from being put on board
@@ -138,11 +162,11 @@ Agent::Action MyAI::getAction( int number )
       board.at(agentY).at(agentX) = to_string(number);
     }
   
-  
-    printBoard();
+
+   //printBoard();
 
   //solved the board
-    if (totalMines == coveredTilesLeft) {
+    if (totalMines == mineCount && checkifanystars()) {
         
 
                 if (safe.size() != 0) {
@@ -163,12 +187,12 @@ Agent::Action MyAI::getAction( int number )
                   //update the agent location
                   agentX = x ;
                   agentY = y ;
-
+//cout << "1 " << x << y << endl;
                   return {UNCOVER, x , y };
                 }
       
-      printBoard();
-      cout << "HELO" << endl;
+// printBoard();
+    //cout << "HELO" << endl;
       return {LEAVE,-1,-1};
     }
   
@@ -190,7 +214,7 @@ Agent::Action MyAI::getAction( int number )
       
       //safe vector will have all safe spots that need to be uncovered
       //safeUncovered vector will have all safe spots and uncovered spots 
-      if (agentY + 1 < colDimension) {
+      if (agentY + 1 < rowDimension) {
         temp.push_back(agentX);
         temp.push_back(agentY + 1);
         
@@ -221,7 +245,7 @@ Agent::Action MyAI::getAction( int number )
         }
         temp.clear();
         
-        if (agentY + 1 < colDimension) {
+        if (agentY + 1 < rowDimension) {
           temp.push_back(agentX - 1);
           temp.push_back(agentY + 1);
           if (find(safeUncovered.begin(), safeUncovered.end(), temp) == safeUncovered.end()) {
@@ -241,7 +265,7 @@ Agent::Action MyAI::getAction( int number )
           temp.clear();
         }
       }
-      if (agentX + 1 < rowDimension) {
+      if (agentX + 1 < colDimension) {
         temp.push_back(agentX + 1);
         temp.push_back(agentY);
         if (find(safeUncovered.begin(), safeUncovered.end(), temp) == safeUncovered.end()) {
@@ -250,7 +274,7 @@ Agent::Action MyAI::getAction( int number )
         }
         temp.clear();
         
-        if (agentY + 1 < colDimension) {
+        if (agentY + 1 < rowDimension) {
           temp.push_back(agentX + 1);
           temp.push_back(agentY + 1);
           if (find(safeUncovered.begin(), safeUncovered.end(), temp) == safeUncovered.end()) {
@@ -283,17 +307,13 @@ Agent::Action MyAI::getAction( int number )
       int y = safe.at(sz - 1).at(1);
       safe.pop_back();
 
-      /* NOTE THAT
-      THE TOP LEFT OF AN 8X8 BOARD IS(0,7)
-      The Manual AI Code has this line in its get action return statement: 
 
-      return {new_action, input_x - 1, input_y - 1};
-      */
 
       //update the agent location
       agentX = x ;
       agentY = y ;
       
+    //  cout << "2 " << x << y << endl;
       return {UNCOVER, x , y };
     }
   
@@ -318,6 +338,14 @@ Agent::Action MyAI::getAction( int number )
         
         int mineX = -1;
         int mineY = -1;
+        
+        //for if frontierNum.at(index) == 2
+        int mineX2 = -1;
+        int mineY2 = -1;
+        
+        //for if frontierNum.at(index) == 3
+        int mineX3 = -1;
+        int mineY3 = -1;
 
         if (frontierNum.at(index) == 1) {
           
@@ -325,7 +353,7 @@ Agent::Action MyAI::getAction( int number )
           int numSq = 0;
           int numB = 0;
 
-          if (y + 1 < colDimension) {
+          if (y + 1 < rowDimension) {
 
             if (board.at(y + 1).at(x) == "*") {
               numSq++;
@@ -363,7 +391,7 @@ Agent::Action MyAI::getAction( int number )
                 ++numB;
               }
 
-            if (y + 1 < colDimension) {
+            if (y + 1 < rowDimension) {
 
               if (board.at(y + 1).at(x - 1) == "*") {
                 numSq++;
@@ -390,7 +418,7 @@ Agent::Action MyAI::getAction( int number )
 
             }
           }
-          if (x + 1 < rowDimension) {
+          if (x + 1 < colDimension) {
 
             if (board.at(y).at(x + 1) == "*") {
               numSq++;
@@ -402,7 +430,7 @@ Agent::Action MyAI::getAction( int number )
                 ++numB;
               }
             
-            if (y + 1 < colDimension) {
+            if (y + 1 < rowDimension) {
 
               if (board.at(y + 1).at(x + 1) == "*") {
                 numSq++;
@@ -436,14 +464,14 @@ Agent::Action MyAI::getAction( int number )
             //then there is a mine at agentX + n and agentY + n and it will be correct because it was updated 1x
             //we don't have to flag it, just don't uncover
             //update our board 
-
+//cout << mineX << mineY << endl;
             board.at(mineY).at(mineX) = "B";
             
             //we want to push back the neighborhood of the marked bomb B so we can do Effective Label calculations
               //vector<vector<int>> bNeighborhood;
                     vector<int> temp;
             
-                    if (mineY + 1 < colDimension) {
+                    if (mineY + 1 < rowDimension) {
                       temp.push_back(mineX);
                       temp.push_back(mineY + 1);
 
@@ -470,7 +498,7 @@ Agent::Action MyAI::getAction( int number )
                       }
                       temp.clear();
 
-                      if (mineY + 1 < colDimension) {
+                      if (mineY + 1 < rowDimension) {
                         temp.push_back(mineX - 1);
                         temp.push_back(mineY + 1);
                         if (find(bNeighborhood.begin(), bNeighborhood.end(), temp) == bNeighborhood.end()) {
@@ -488,7 +516,7 @@ Agent::Action MyAI::getAction( int number )
                         temp.clear();
                       }
                     }
-                    if (mineX + 1 < rowDimension) {
+                    if (mineX + 1 < colDimension) {
                       temp.push_back(mineX + 1);
                       temp.push_back(mineY);
                       if (find(bNeighborhood.begin(), bNeighborhood.end(), temp) == bNeighborhood.end()) {
@@ -496,7 +524,7 @@ Agent::Action MyAI::getAction( int number )
                       }
                       temp.clear();
 
-                      if (mineY + 1 < colDimension) {
+                      if (mineY + 1 < rowDimension) {
                         temp.push_back(mineX + 1);
                         temp.push_back(mineY + 1);
                         if (find(bNeighborhood.begin(), bNeighborhood.end(), temp) == bNeighborhood.end()) {
@@ -552,6 +580,832 @@ Agent::Action MyAI::getAction( int number )
           }
 
         }
+        else if (frontierNum.at(index) == 2) {
+        //for if frontierNum.at(index) == 2
+        // int mineX2 = -1;
+        // int mineY2 = -1;
+                      int numSq = 0;
+                      int numB = 0;
+
+                      if (y + 1 < rowDimension) {
+
+                        if (board.at(y + 1).at(x) == "*") {
+                          numSq++;
+                          mineX = x;
+                          mineY = y + 1;
+                        }
+
+                          if (board.at(y + 1).at(x) == "B") {
+                            ++numB;
+                          }
+
+                      }
+                      if (y - 1 >= 0) {
+
+                        if (board.at(y - 1).at(x) == "*") {
+                          numSq++;
+                                  if (mineX != -1 && mineY != -1) {
+                                    mineX2 = x;
+                                    mineY2 = y-1;
+                                  }
+                                  else {
+                                    mineX = x;
+                                    mineY = y - 1;
+                                  }
+                        }
+
+                          if (board.at(y - 1).at(x) == "B") {
+                            ++numB;
+                          }
+
+                      }
+                      if (x - 1 >= 0) {
+
+                        if (board.at(y).at(x - 1) == "*") {
+                          numSq++;
+                                  if (mineX != -1 && mineY != -1) {
+                                    mineX2 = x-1;
+                                    mineY2 = y;
+                                  }
+                                  else {
+                                    mineX = x - 1;
+                                    mineY = y;
+                                  }
+                        }
+
+                          if (board.at(y).at(x - 1) == "B") {
+                            ++numB;
+                          }
+
+                        if (y + 1 < rowDimension) {
+
+                          if (board.at(y + 1).at(x - 1) == "*") {
+                            numSq++;
+                                    if (mineX != -1 && mineY != -1) {
+                                      mineX2 = x-1;
+                                      mineY2 = y+1;
+                                    }
+                                    else {
+                                      mineX = x - 1;
+                                      mineY = y + 1;
+                                    }
+                          }
+
+                            if (board.at(y + 1).at(x - 1) == "B") {
+                              ++numB;
+                            }
+
+                        }
+                        if (y - 1 >= 0) {
+
+                          if (board.at(y - 1).at(x - 1) == "*") {
+                            numSq++;
+                                    if (mineX != -1 && mineY != -1) {
+                                      mineX2 = x-1;
+                                      mineY2 = y-1;
+                                    }
+                                    else {
+                                      mineX = x - 1;
+                                      mineY = y - 1;
+                                    }
+                          }
+
+                            if (board.at(y - 1).at(x - 1) == "B") {
+                              ++numB;
+                            }
+
+                        }
+                      }
+                      if (x + 1 < colDimension) {
+
+                        if (board.at(y).at(x + 1) == "*") {
+                          numSq++;
+                                    if (mineX != -1 && mineY != -1) {
+                                      mineX2 = x+1;
+                                      mineY2 = y;
+                                    }
+                                    else {
+                                      mineX = x + 1;
+                                      mineY = y;
+                                    }
+                        }
+
+                          if (board.at(y).at(x + 1) == "B") {
+                            ++numB;
+                          }
+
+                        if (y + 1 < rowDimension) {
+
+                          if (board.at(y + 1).at(x + 1) == "*") {
+                            numSq++;
+                                      if (mineX != -1 && mineY != -1) {
+                                        mineX2 = x+1;
+                                        mineY2 = y+1;
+                                      }
+                                      else {
+                                        mineX = x + 1;
+                                        mineY = y + 1;
+                                      }
+                          }
+
+                            if (board.at(y + 1).at(x + 1) == "B") {
+                              ++numB;
+                            }
+
+                        }
+                        if (y - 1 >= 0) {
+
+                          if (board.at(y - 1).at(x + 1) == "*") {
+                            numSq++;
+                                      if (mineX != -1 && mineY != -1) {
+                                        mineX2 = x+1;
+                                        mineY2 = y-1;
+                                      }
+                                      else {
+                                        mineX = x + 1;
+                                        mineY = y - 1;
+                                      }
+                          }
+
+                            if (board.at(y - 1).at(x + 1) == "B") {
+                              ++numB;
+                            }
+
+                        }
+                      }
+
+                      // cout << numSq << endl;
+
+                      if (numSq == 2 && numB == 0) {
+                        //then there is a mine at agentX + n and agentY + n and it will be correct because it was updated 1x
+                        //we don't have to flag it, just don't uncover
+                        //update our board 
+            //cout << mineX << mineY << endl;
+                        board.at(mineY).at(mineX) = "B";
+                        
+                        board.at(mineY2).at(mineX2) = "B";
+
+                        //we want to push back the neighborhood of the marked bomb B so we can do Effective Label calculations
+                          //vector<vector<int>> bNeighborhood;
+                                vector<int> temp;
+
+                                if (mineY + 1 <  rowDimension) {
+                                  temp.push_back(mineX);
+                                  temp.push_back(mineY + 1);
+
+
+                                  if (find(bNeighborhood.begin(), bNeighborhood.end(), temp) == bNeighborhood.end()) {
+                                    bNeighborhood.push_back(temp);
+                                  }
+
+                                  temp.clear();
+                                }
+                                if (mineY - 1 >= 0) {
+                                  temp.push_back(mineX);
+                                  temp.push_back(mineY - 1);
+                                  if (find(bNeighborhood.begin(), bNeighborhood.end(), temp) == bNeighborhood.end()) {
+                                    bNeighborhood.push_back(temp);
+                                  }
+                                  temp.clear();
+                                }
+                                if (mineX - 1 >= 0) {
+                                  temp.push_back(mineX - 1);
+                                  temp.push_back(mineY);
+                                  if (find(bNeighborhood.begin(), bNeighborhood.end(), temp) == bNeighborhood.end()) {
+                                    bNeighborhood.push_back(temp);
+                                  }
+                                  temp.clear();
+
+                                  if (mineY + 1 < rowDimension) {
+                                    temp.push_back(mineX - 1);
+                                    temp.push_back(mineY + 1);
+                                    if (find(bNeighborhood.begin(), bNeighborhood.end(), temp) == bNeighborhood.end()) {
+                                      bNeighborhood.push_back(temp);
+                                    }
+
+                                    temp.clear();
+                                  }
+                                  if (mineY - 1 >= 0) {
+                                    temp.push_back(mineX - 1);
+                                    temp.push_back(mineY - 1);
+                                    if (find(bNeighborhood.begin(), bNeighborhood.end(), temp) == bNeighborhood.end()) {
+                                      bNeighborhood.push_back(temp);
+                                    }
+                                    temp.clear();
+                                  }
+                                }
+                                if (mineX + 1 < colDimension) {
+                                  temp.push_back(mineX + 1);
+                                  temp.push_back(mineY);
+                                  if (find(bNeighborhood.begin(), bNeighborhood.end(), temp) == bNeighborhood.end()) {
+                                    bNeighborhood.push_back(temp);
+                                  }
+                                  temp.clear();
+
+                                  if (mineY + 1 < rowDimension) {
+                                    temp.push_back(mineX + 1);
+                                    temp.push_back(mineY + 1);
+                                    if (find(bNeighborhood.begin(), bNeighborhood.end(), temp) == bNeighborhood.end()) {
+                                      bNeighborhood.push_back(temp);
+                                    }
+
+                                    temp.clear();
+
+                                  }
+                                  if (mineY - 1 >= 0) {
+                                    temp.push_back(mineX + 1);
+                                    temp.push_back(mineY - 1);
+                                    if (find(bNeighborhood.begin(), bNeighborhood.end(), temp) == bNeighborhood.end()) {
+                                      bNeighborhood.push_back(temp);
+                                    }
+                                    temp.clear();
+                                  }
+                                }
+
+                                //
+                                if (mineY2 + 1 < rowDimension) {
+                                  temp.push_back(mineX2);
+                                  temp.push_back(mineY2 + 1);
+
+
+                                  if (find(bNeighborhood.begin(), bNeighborhood.end(), temp) == bNeighborhood.end()) {
+                                    bNeighborhood.push_back(temp);
+                                  }
+
+                                  temp.clear();
+                                }
+                                if (mineY2 - 1 >= 0) {
+                                  temp.push_back(mineX2);
+                                  temp.push_back(mineY2 - 1);
+                                  if (find(bNeighborhood.begin(), bNeighborhood.end(), temp) == bNeighborhood.end()) {
+                                    bNeighborhood.push_back(temp);
+                                  }
+                                  temp.clear();
+                                }
+                                if (mineX2 - 1 >= 0) {
+                                  temp.push_back(mineX2 - 1);
+                                  temp.push_back(mineY2);
+                                  if (find(bNeighborhood.begin(), bNeighborhood.end(), temp) == bNeighborhood.end()) {
+                                    bNeighborhood.push_back(temp);
+                                  }
+                                  temp.clear();
+
+                                  if (mineY2 + 1 < rowDimension) {
+                                    temp.push_back(mineX2 - 1);
+                                    temp.push_back(mineY2 + 1);
+                                    if (find(bNeighborhood.begin(), bNeighborhood.end(), temp) == bNeighborhood.end()) {
+                                      bNeighborhood.push_back(temp);
+                                    }
+
+                                    temp.clear();
+                                  }
+                                  if (mineY2 - 1 >= 0) {
+                                    temp.push_back(mineX2 - 1);
+                                    temp.push_back(mineY2 - 1);
+                                    if (find(bNeighborhood.begin(), bNeighborhood.end(), temp) == bNeighborhood.end()) {
+                                      bNeighborhood.push_back(temp);
+                                    }
+                                    temp.clear();
+                                  }
+                                }
+                                if (mineX2 + 1 < colDimension) {
+                                  temp.push_back(mineX2 + 1);
+                                  temp.push_back(mineY2);
+                                  if (find(bNeighborhood.begin(), bNeighborhood.end(), temp) == bNeighborhood.end()) {
+                                    bNeighborhood.push_back(temp);
+                                  }
+                                  temp.clear();
+
+                                  if (mineY2 + 1 < rowDimension) {
+                                    temp.push_back(mineX2 + 1);
+                                    temp.push_back(mineY2 + 1);
+                                    if (find(bNeighborhood.begin(), bNeighborhood.end(), temp) == bNeighborhood.end()) {
+                                      bNeighborhood.push_back(temp);
+                                    }
+
+                                    temp.clear();
+
+                                  }
+                                  if (mineY2 - 1 >= 0) {
+                                    temp.push_back(mineX2 + 1);
+                                    temp.push_back(mineY2 - 1);
+                                    if (find(bNeighborhood.begin(), bNeighborhood.end(), temp) == bNeighborhood.end()) {
+                                      bNeighborhood.push_back(temp);
+                                    }
+                                    temp.clear();
+                                  }
+                                }
+                        // //items to be flagged later
+                        // vector<int> flagVal;
+                        // flagVal.push_back(mineX);
+                        // flagVal.push_back(mineY);
+                        // flagThese.push_back(flagVal);
+
+                        --coveredTilesLeft;
+                        --coveredTilesLeft;
+                        ++mineCount;
+                        ++mineCount;
+
+                                  if (mineCount == totalMines) {
+                                    //uncover everything else (add them to safe) 
+
+                                    vector<int> temp;
+
+                                    for (int i = 0; i < board.size(); ++i) {
+                                      for (int j = 0; j < board.at(i).size(); ++j) {
+                                        if (board.at(i).at(j) == "*") {
+
+                                          temp.push_back(j);
+                                          temp.push_back(i);
+                                          if (find(safeUncovered.begin(), safeUncovered.end(), temp) == safeUncovered.end()) {
+                                            safe.push_back(temp);
+                                            safeUncovered.push_back(temp);
+                                          }
+
+                                          temp.clear();
+
+                                        }
+                                      }
+                                    }
+
+
+                                  }
+                      }
+        }
+        else if (frontierNum.at(index) == 3) {
+          //for if frontierNum.at(index) == 3
+          int mineX3 = -1;
+          int mineY3 = -1;
+          
+                      int numSq = 0;
+                      int numB = 0;
+
+                      if (y + 1 < rowDimension) {
+
+                        if (board.at(y + 1).at(x) == "*") {
+                          numSq++;
+                          mineX = x;
+                          mineY = y + 1;
+                        }
+
+                          if (board.at(y + 1).at(x) == "B") {
+                            ++numB;
+                          }
+
+                      }
+                      if (y - 1 >= 0) {
+
+                        if (board.at(y - 1).at(x) == "*") {
+                          numSq++;
+                                  if (mineX != -1 && mineY != -1) {
+                                    mineX2 = x;
+                                    mineY2 = y-1;
+                                  }
+                                  else {
+                                    mineX = x;
+                                    mineY = y - 1;
+                                  }
+                        }
+
+                          if (board.at(y - 1).at(x) == "B") {
+                            ++numB;
+                          }
+
+                      }
+                      if (x - 1 >= 0) {
+
+                        if (board.at(y).at(x - 1) == "*") {
+                          numSq++;
+                                  if (mineX != -1 && mineY != -1) {
+                                      if (mineX2 != -1 && mineY2 != -1) {
+                                        mineX3 = x-1;
+                                        mineY3 = y;
+                                      }
+                                      else {
+                                        mineX2 = x-1;
+                                        mineY2 = y;
+                                      }
+                                    
+                                  }
+                                  else {
+                                    mineX = x - 1;
+                                    mineY = y;
+                                  }
+                        }
+
+                          if (board.at(y).at(x - 1) == "B") {
+                            ++numB;
+                          }
+
+                        if (y + 1 < rowDimension) {
+
+                          if (board.at(y + 1).at(x - 1) == "*") {
+                            numSq++;
+                                  if (mineX != -1 && mineY != -1) {
+                                      if (mineX2 != -1 && mineY2 != -1) {
+                                        mineX3 = x-1;
+                                        mineY3 = y+1;
+                                      }
+                                      else {
+                                        mineX2 = x-1;
+                                        mineY2 = y+1;
+                                      }
+                                    
+                                  }
+                                  else {
+                                    mineX = x - 1;
+                                    mineY = y+1;
+                                  }
+                          }
+
+                            if (board.at(y + 1).at(x - 1) == "B") {
+                              ++numB;
+                            }
+
+                        }
+                        if (y - 1 >= 0) {
+
+                          if (board.at(y - 1).at(x - 1) == "*") {
+                            numSq++;
+                                  if (mineX != -1 && mineY != -1) {
+                                      if (mineX2 != -1 && mineY2 != -1) {
+                                        mineX3 = x-1;
+                                        mineY3 = y-1;
+                                      }
+                                      else {
+                                        mineX2 = x-1;
+                                        mineY2 = y-1;
+                                      }
+                                    
+                                  }
+                                  else {
+                                    mineX = x - 1;
+                                    mineY = y-1;
+                                  }
+                          }
+
+                            if (board.at(y - 1).at(x - 1) == "B") {
+                              ++numB;
+                            }
+
+                        }
+                      }
+                      if (x + 1 < colDimension) {
+
+                        if (board.at(y).at(x + 1) == "*") {
+                          numSq++;
+                                  if (mineX != -1 && mineY != -1) {
+                                      if (mineX2 != -1 && mineY2 != -1) {
+                                        mineX3 = x+1;
+                                        mineY3 = y;
+                                      }
+                                      else {
+                                        mineX2 = x+1;
+                                        mineY2 = y;
+                                      }
+                                    
+                                  }
+                                  else {
+                                    mineX = x + 1;
+                                    mineY = y;
+                                  }
+                        }
+
+                          if (board.at(y).at(x + 1) == "B") {
+                            ++numB;
+                          }
+
+                        if (y + 1 < rowDimension) {
+
+                          if (board.at(y + 1).at(x + 1) == "*") {
+                            numSq++;
+                                  if (mineX != -1 && mineY != -1) {
+                                      if (mineX2 != -1 && mineY2 != -1) {
+                                        mineX3 = x+1;
+                                        mineY3 = y+1;
+                                      }
+                                      else {
+                                        mineX2 = x+1;
+                                        mineY2 = y+1;
+                                      }
+                                    
+                                  }
+                                  else {
+                                    mineX = x + 1;
+                                    mineY = y + 1;
+                                  }
+                          }
+
+                            if (board.at(y + 1).at(x + 1) == "B") {
+                              ++numB;
+                            }
+
+                        }
+                        if (y - 1 >= 0) {
+
+                          if (board.at(y - 1).at(x + 1) == "*") {
+                            numSq++;
+                                  if (mineX != -1 && mineY != -1) {
+                                      if (mineX2 != -1 && mineY2 != -1) {
+                                        mineX3 = x+1;
+                                        mineY3 = y-1;
+                                      }
+                                      else {
+                                        mineX2 = x+1;
+                                        mineY2 = y-1;
+                                      }
+                                    
+                                  }
+                                  else {
+                                    mineX = x + 1;
+                                    mineY = y - 1;
+                                  }
+                          }
+
+                            if (board.at(y - 1).at(x + 1) == "B") {
+                              ++numB;
+                            }
+
+                        }
+                      }
+
+                      // cout << numSq << endl;
+
+                      if (numSq == 3 && numB == 0) {
+                        //then there is a mine at agentX + n and agentY + n and it will be correct because it was updated 1x
+                        //we don't have to flag it, just don't uncover
+                        //update our board 
+            //cout << mineX << mineY << endl;
+                        board.at(mineY).at(mineX) = "B";
+                        
+                        board.at(mineY2).at(mineX2) = "B";
+                        
+                        board.at(mineY3).at(mineX3) = "B";
+
+                        //we want to push back the neighborhood of the marked bomb B so we can do Effective Label calculations
+                          //vector<vector<int>> bNeighborhood;
+                                vector<int> temp;
+
+                                if (mineY + 1 < rowDimension) {
+                                  temp.push_back(mineX);
+                                  temp.push_back(mineY + 1);
+
+
+                                  if (find(bNeighborhood.begin(), bNeighborhood.end(), temp) == bNeighborhood.end()) {
+                                    bNeighborhood.push_back(temp);
+                                  }
+
+                                  temp.clear();
+                                }
+                                if (mineY - 1 >= 0) {
+                                  temp.push_back(mineX);
+                                  temp.push_back(mineY - 1);
+                                  if (find(bNeighborhood.begin(), bNeighborhood.end(), temp) == bNeighborhood.end()) {
+                                    bNeighborhood.push_back(temp);
+                                  }
+                                  temp.clear();
+                                }
+                                if (mineX - 1 >= 0) {
+                                  temp.push_back(mineX - 1);
+                                  temp.push_back(mineY);
+                                  if (find(bNeighborhood.begin(), bNeighborhood.end(), temp) == bNeighborhood.end()) {
+                                    bNeighborhood.push_back(temp);
+                                  }
+                                  temp.clear();
+
+                                  if (mineY + 1 < rowDimension) {
+                                    temp.push_back(mineX - 1);
+                                    temp.push_back(mineY + 1);
+                                    if (find(bNeighborhood.begin(), bNeighborhood.end(), temp) == bNeighborhood.end()) {
+                                      bNeighborhood.push_back(temp);
+                                    }
+
+                                    temp.clear();
+                                  }
+                                  if (mineY - 1 >= 0) {
+                                    temp.push_back(mineX - 1);
+                                    temp.push_back(mineY - 1);
+                                    if (find(bNeighborhood.begin(), bNeighborhood.end(), temp) == bNeighborhood.end()) {
+                                      bNeighborhood.push_back(temp);
+                                    }
+                                    temp.clear();
+                                  }
+                                }
+                                if (mineX + 1 < colDimension) {
+                                  temp.push_back(mineX + 1);
+                                  temp.push_back(mineY);
+                                  if (find(bNeighborhood.begin(), bNeighborhood.end(), temp) == bNeighborhood.end()) {
+                                    bNeighborhood.push_back(temp);
+                                  }
+                                  temp.clear();
+
+                                  if (mineY + 1 < rowDimension) {
+                                    temp.push_back(mineX + 1);
+                                    temp.push_back(mineY + 1);
+                                    if (find(bNeighborhood.begin(), bNeighborhood.end(), temp) == bNeighborhood.end()) {
+                                      bNeighborhood.push_back(temp);
+                                    }
+
+                                    temp.clear();
+
+                                  }
+                                  if (mineY - 1 >= 0) {
+                                    temp.push_back(mineX + 1);
+                                    temp.push_back(mineY - 1);
+                                    if (find(bNeighborhood.begin(), bNeighborhood.end(), temp) == bNeighborhood.end()) {
+                                      bNeighborhood.push_back(temp);
+                                    }
+                                    temp.clear();
+                                  }
+                                }
+
+                                //
+                                if (mineY2 + 1 < rowDimension) {
+                                  temp.push_back(mineX2);
+                                  temp.push_back(mineY2 + 1);
+
+
+                                  if (find(bNeighborhood.begin(), bNeighborhood.end(), temp) == bNeighborhood.end()) {
+                                    bNeighborhood.push_back(temp);
+                                  }
+
+                                  temp.clear();
+                                }
+                                if (mineY2 - 1 >= 0) {
+                                  temp.push_back(mineX2);
+                                  temp.push_back(mineY2 - 1);
+                                  if (find(bNeighborhood.begin(), bNeighborhood.end(), temp) == bNeighborhood.end()) {
+                                    bNeighborhood.push_back(temp);
+                                  }
+                                  temp.clear();
+                                }
+                                if (mineX2 - 1 >= 0) {
+                                  temp.push_back(mineX2 - 1);
+                                  temp.push_back(mineY2);
+                                  if (find(bNeighborhood.begin(), bNeighborhood.end(), temp) == bNeighborhood.end()) {
+                                    bNeighborhood.push_back(temp);
+                                  }
+                                  temp.clear();
+
+                                  if (mineY2 + 1 < rowDimension) {
+                                    temp.push_back(mineX2 - 1);
+                                    temp.push_back(mineY2 + 1);
+                                    if (find(bNeighborhood.begin(), bNeighborhood.end(), temp) == bNeighborhood.end()) {
+                                      bNeighborhood.push_back(temp);
+                                    }
+
+                                    temp.clear();
+                                  }
+                                  if (mineY2 - 1 >= 0) {
+                                    temp.push_back(mineX2 - 1);
+                                    temp.push_back(mineY2 - 1);
+                                    if (find(bNeighborhood.begin(), bNeighborhood.end(), temp) == bNeighborhood.end()) {
+                                      bNeighborhood.push_back(temp);
+                                    }
+                                    temp.clear();
+                                  }
+                                }
+                                if (mineX2 + 1 < colDimension) {
+                                  temp.push_back(mineX2 + 1);
+                                  temp.push_back(mineY2);
+                                  if (find(bNeighborhood.begin(), bNeighborhood.end(), temp) == bNeighborhood.end()) {
+                                    bNeighborhood.push_back(temp);
+                                  }
+                                  temp.clear();
+
+                                  if (mineY2 + 1 < rowDimension) {
+                                    temp.push_back(mineX2 + 1);
+                                    temp.push_back(mineY2 + 1);
+                                    if (find(bNeighborhood.begin(), bNeighborhood.end(), temp) == bNeighborhood.end()) {
+                                      bNeighborhood.push_back(temp);
+                                    }
+
+                                    temp.clear();
+
+                                  }
+                                  if (mineY2 - 1 >= 0) {
+                                    temp.push_back(mineX2 + 1);
+                                    temp.push_back(mineY2 - 1);
+                                    if (find(bNeighborhood.begin(), bNeighborhood.end(), temp) == bNeighborhood.end()) {
+                                      bNeighborhood.push_back(temp);
+                                    }
+                                    temp.clear();
+                                  }
+                                }
+                        
+                        //
+                               if (mineY3 + 1 < rowDimension) {
+                                  temp.push_back(mineX3);
+                                  temp.push_back(mineY3 + 1);
+
+
+                                  if (find(bNeighborhood.begin(), bNeighborhood.end(), temp) == bNeighborhood.end()) {
+                                    bNeighborhood.push_back(temp);
+                                  }
+
+                                  temp.clear();
+                                }
+                                if (mineY3 - 1 >= 0) {
+                                  temp.push_back(mineX3);
+                                  temp.push_back(mineY3 - 1);
+                                  if (find(bNeighborhood.begin(), bNeighborhood.end(), temp) == bNeighborhood.end()) {
+                                    bNeighborhood.push_back(temp);
+                                  }
+                                  temp.clear();
+                                }
+                                if (mineX3 - 1 >= 0) {
+                                  temp.push_back(mineX3 - 1);
+                                  temp.push_back(mineY3);
+                                  if (find(bNeighborhood.begin(), bNeighborhood.end(), temp) == bNeighborhood.end()) {
+                                    bNeighborhood.push_back(temp);
+                                  }
+                                  temp.clear();
+
+                                  if (mineY3 + 1 < rowDimension) {
+                                    temp.push_back(mineX3 - 1);
+                                    temp.push_back(mineY3 + 1);
+                                    if (find(bNeighborhood.begin(), bNeighborhood.end(), temp) == bNeighborhood.end()) {
+                                      bNeighborhood.push_back(temp);
+                                    }
+
+                                    temp.clear();
+                                  }
+                                  if (mineY3 - 1 >= 0) {
+                                    temp.push_back(mineX3 - 1);
+                                    temp.push_back(mineY3 - 1);
+                                    if (find(bNeighborhood.begin(), bNeighborhood.end(), temp) == bNeighborhood.end()) {
+                                      bNeighborhood.push_back(temp);
+                                    }
+                                    temp.clear();
+                                  }
+                                }
+                                if (mineX3 + 1 < colDimension) {
+                                  temp.push_back(mineX3 + 1);
+                                  temp.push_back(mineY3);
+                                  if (find(bNeighborhood.begin(), bNeighborhood.end(), temp) == bNeighborhood.end()) {
+                                    bNeighborhood.push_back(temp);
+                                  }
+                                  temp.clear();
+
+                                  if (mineY3 + 1 < rowDimension) {
+                                    temp.push_back(mineX3 + 1);
+                                    temp.push_back(mineY3 + 1);
+                                    if (find(bNeighborhood.begin(), bNeighborhood.end(), temp) == bNeighborhood.end()) {
+                                      bNeighborhood.push_back(temp);
+                                    }
+
+                                    temp.clear();
+
+                                  }
+                                  if (mineY3 - 1 >= 0) {
+                                    temp.push_back(mineX3 + 1);
+                                    temp.push_back(mineY3 - 1);
+                                    if (find(bNeighborhood.begin(), bNeighborhood.end(), temp) == bNeighborhood.end()) {
+                                      bNeighborhood.push_back(temp);
+                                    }
+                                    temp.clear();
+                                  }
+                                }
+                        // //items to be flagged later
+                        // vector<int> flagVal;
+                        // flagVal.push_back(mineX);
+                        // flagVal.push_back(mineY);
+                        // flagThese.push_back(flagVal);
+
+                        --coveredTilesLeft;
+                        --coveredTilesLeft;
+                        --coveredTilesLeft;
+                        ++mineCount;
+                        ++mineCount;
+                        ++mineCount;
+
+                                  if (mineCount == totalMines) {
+                                    //uncover everything else (add them to safe) 
+
+                                    vector<int> temp;
+
+                                    for (int i = 0; i < board.size(); ++i) {
+                                      for (int j = 0; j < board.at(i).size(); ++j) {
+                                        if (board.at(i).at(j) == "*") {
+
+                                          temp.push_back(j);
+                                          temp.push_back(i);
+                                          if (find(safeUncovered.begin(), safeUncovered.end(), temp) == safeUncovered.end()) {
+                                            safe.push_back(temp);
+                                            safeUncovered.push_back(temp);
+                                          }
+
+                                          temp.clear();
+
+                                        }
+                                      }
+                                    }
+
+
+                                  }
+                      }          
+          
+        }
         --index;
       }
       
@@ -579,23 +1433,28 @@ Agent::Action MyAI::getAction( int number )
 //       return {UNCOVER, x , y };
       
               //When the number 1 has EXACTLY one empty square around it, then we know there’s a mine there.
+      
+      
     }
   
   
   
   
   
-  
+  //printBoard();
 //END OF SUBMISSION 1 
   
     //effective label calculations
     //EffectiveLabel(x) = Label(x) – NumMarkedNeighbors(x)
-    while (bNeighborhood.size() != 0) {
+  int effectiveLabel;
+  while (bNeighborhood.size() != 0) {
       
       int sz = bNeighborhood.size();
       int x = bNeighborhood.at(sz - 1).at(0);
       int y = bNeighborhood.at(sz - 1).at(1);
       
+    //cout << "bNeigh " << x << y << endl;
+    
       //number at x y
       //board stores strings         so we convert it to int later
       string labelStr = board.at(y).at(x);
@@ -603,164 +1462,530 @@ Agent::Action MyAI::getAction( int number )
       //these values have a relevant Label value
       if (labelStr != "0" && labelStr != "*" && labelStr != "B") {
         
-          //label num
-          int label = stoi(labelStr);
-          
+            //label num
+            int label = stoi(labelStr);
+    
         
-          int effectiveLabel = effectiveLabelCalc(label, x, y);
-          //find numMarkedNeighbors
-          //vector<vector<int>> unmarkedNeighbors;
+            //bool relevant = neighborBomb(x, y);
+            
+            //returns effective label BUT ALSO updates correct unmarkedNeighbors
+            effectiveLabel = effectiveLabelCalc(label, x, y);
+        
+      // if(x == 1 && y == 7) {
+      //   cout << "EL: " << effectiveLabel << endl;
+      // }
+            //find numMarkedNeighbors
+            //vector<vector<int>> unmarkedNeighbors;
 
             // - if EffectiveLabel(x) = 0, then all UnMarkedNeighbors(x) must be safe (you can UNCOVER them)
             if (effectiveLabel == 0) {
               vector<int> temp;
-              int sz;
+              int sz = unmarkedNeighbors.size();
+              
+              
+              bool didwePushAnUnmarkedNeighbor = false;
+              
+              bNeighborhood.pop_back();
+            
+              while (sz != 0) {
 
-              while (unmarkedNeighbors.size() != 0) {
 
-                sz = unmarkedNeighbors.size();
-                temp.push_back(unmarkedNeighbors.at(sz-1).at(0));
-                temp.push_back(unmarkedNeighbors.at(sz-1).at(1));
-                
-                //if not already known as safe
-                if (find(safeUncovered.begin(), safeUncovered.end(), temp) == safeUncovered.end()) {
-                  safe.push_back(temp);
-                  safeUncovered.push_back(temp);
-                }
+                    temp.push_back(unmarkedNeighbors.at(sz-1).at(0));
+                    temp.push_back(unmarkedNeighbors.at(sz-1).at(1));
 
-                unmarkedNeighbors.pop_back();
-              }
-              //unmarkedNeighbors should be cleared if this loop is executed
+                    //if not already known as safe
+                    if (find(safeUncovered.begin(), safeUncovered.end(), temp) == safeUncovered.end()) {
+                                              safe.push_back(temp);
+                                              safeUncovered.push_back(temp);
+                      
+                                              didwePushAnUnmarkedNeighbor = true;
+
+                  //In the case of EffectiveLabel(x) = 0, it will not change the value of any other effective labels 
+                  //on the board because it is not revealing any mines. 
+                  //The effective label of a tile is only changed when a new mine is found/flagged. 
+                  //However, by uncovering the tiles surrounding the effective label 0 tile, you are right 
+                  //that this changes the amount of unmarked neighbors for other tiles. 
+                  //You could run the first if statement "if EffectiveLabel(x) = NumUnMarkedNeighbors(x)" 
+                  //on the tiles affected by these newly uncovered tiles. Doing so might reveal more mines.
+
+                                                //push back neighborhood of every unmarked neighbor
+                                                temp.clear();
+                      
+                                                int x2 = unmarkedNeighbors.at(sz-1).at(0);
+                                                int y2 = unmarkedNeighbors.at(sz-1).at(1);
+                      
+                      bool relevant2 = false;
+                      
+                      
+                                                if (y2 + 1 < rowDimension) {
+                                                  temp.push_back(x2);
+                                                  temp.push_back(y2 + 1);
+                                                  
+                                                  relevant2 = neighborBomb(x2, y2+1);
+
+
+                                                  if (relevant2 && find(bNeighborhood.begin(), bNeighborhood.end(), temp) == bNeighborhood.end()) {
+                                                    bNeighborhood.push_back(temp);
+                                                  }
+                                        
+                                                  temp.clear();
+                                                  relevant2 = false;
+                                                }
+                                                if (y2 - 1 >= 0) {
+                                                  temp.push_back(x2);
+                                                  temp.push_back(y2 - 1);
+                                                  
+                                                  relevant2 = neighborBomb(x2, y2-1);
+                                                  
+                                                  if (relevant2 && find(bNeighborhood.begin(), bNeighborhood.end(), temp) == bNeighborhood.end()) {
+                                                    bNeighborhood.push_back(temp);
+                                                  }
+                                                  temp.clear();
+                                                  relevant2 = false;
+                                                }
+                                                if (x2 - 1 >= 0) {
+                                                  temp.push_back(x2 - 1);
+                                                  temp.push_back(y2);
+                                                  
+                                                  relevant2 = neighborBomb(x2-1, y2);
+                                                  
+                                                  if (relevant2 && find(bNeighborhood.begin(), bNeighborhood.end(), temp) == bNeighborhood.end()) {
+                                                    bNeighborhood.push_back(temp);
+                                                  }
+                                                  temp.clear();
+                                                  relevant2 = false;
+
+                                                  if (y2 + 1 < rowDimension) {
+                                                    temp.push_back(x2 - 1);
+                                                    temp.push_back(y2 + 1);
+                                                    
+                                                    relevant2 = neighborBomb(x2-1, y2+1);
+                                                    
+                                                    if (relevant2 && find(bNeighborhood.begin(), bNeighborhood.end(), temp) == bNeighborhood.end()) {
+                                                      bNeighborhood.push_back(temp);
+                                                    }
+
+                                                    temp.clear();
+                                                    relevant2 = false;
+                                                  }
+                                                  if (y2 - 1 >= 0) {
+                                                    temp.push_back(x2 - 1);
+                                                    temp.push_back(y2 - 1);
+                                                    
+                                                    relevant2 = neighborBomb(x2-1, y2-1);
+                                                    
+                                                    if (relevant2 && find(bNeighborhood.begin(), bNeighborhood.end(), temp) == bNeighborhood.end()) {
+                                                      bNeighborhood.push_back(temp);
+                                                    }
+                                                    temp.clear();
+                                                    relevant2 = false;
+                                                  }
+                                                }
+                                                if (x2 + 1 < colDimension) {
+                                                  temp.push_back(x2 + 1);
+                                                  temp.push_back(y2);
+                                                  
+                                                  relevant2 = neighborBomb(x2+1, y2);
+                                                  
+                                                  if (relevant2 && find(bNeighborhood.begin(), bNeighborhood.end(), temp) == bNeighborhood.end()) {
+                                                    bNeighborhood.push_back(temp);
+                                                  }
+                                                  temp.clear();
+                                                  relevant2 = false;
+
+                                                  if (y2 + 1 < rowDimension) {
+                                                    temp.push_back(x2 + 1);
+                                                    temp.push_back(y2 + 1);
+                                                    
+                                                    relevant2 = neighborBomb(x2+1, y2+1);
+                                                    
+                                                    if (relevant2 && find(bNeighborhood.begin(), bNeighborhood.end(), temp) == bNeighborhood.end()) {
+                                                      bNeighborhood.push_back(temp);
+                                                    }
+
+                                                    temp.clear();
+                                                    relevant2 = false;
+
+                                                  }
+                                                  if (y2 - 1 >= 0) {
+                                                    temp.push_back(x2 + 1);
+                                                    temp.push_back(y2 - 1);
+                                                    
+                                                    relevant2 = neighborBomb(x2+1, y2-1);
+                                                    
+                                                    if (relevant2 && find(bNeighborhood.begin(), bNeighborhood.end(), temp) == bNeighborhood.end()) {
+                                                      bNeighborhood.push_back(temp);
+                                                    }
+                                                    temp.clear();
+                                                    relevant2 = false;
+                                                  }
+                                                }
+                          
+                    }
+                    sz--;
+
+                   
+                  }
+                  //the above can only be validated when we actually uncover and update the board 
+                  //so we start it off by uncover and leaving this part of code
+              
+                  if (didwePushAnUnmarkedNeighbor == true) {
+                     --coveredTilesLeft;
+                      int sz3 = safe.size();
+                      int x3 = safe.at(sz3 - 1).at(0);
+                      int y3 = safe.at(sz3 - 1).at(1);
+                      safe.pop_back();
+
+                      //update the agent location
+                      agentX = x3 ;
+                      agentY = y3 ;
+//cout << "3 " << x3 << y3 << endl;
+                      return {UNCOVER, x3 , y3 };
+                  }
+
+             
+
+            
             }
             //
             
             // - if EffectiveLabel(x) = NumUnMarkedNeighbors(x), then all UnMarkedNeighbors(x) must be mines (mark them as
             // such on the board; this is likely to reduce effective labels of other nearby uncovered tiles, 
             // so that the rules-of-thumb can be fired again)
-//             else if (effectiveLabel == numMarkedNeighbors) {
-//                               //                               sz1 = 0;
-//                               //                               x1 = -1;
-//                               //                               y1 = -1;
-//                               //board.at(mineY).at(mineX) = "B"
-//                               while (unmarkedNeighbors.size() != 0) {
-
-//                                 sz1 = unmarkedNeighbors.size();
-//                                 int x1 = unmarkedNeighbors.at(sz1-1).at(0);
-//                                 int y1 = unmarkedNeighbors.at(sz1-1).at(1);
-
-//                                 board.at(y1).at(x1) = "B";
-//                                             --coveredTilesLeft;
-//                                             ++mineCount;
-//                                   //!FIX!//
-//                                  //we want to push back the neighborhood of the marked bomb B so we can do Effective Label calculations
-//                                 //vector<vector<int>> bNeighborhood;
-                                                  
-//                                             vector<int> temp;
-
-//                                             if (y1 + 1 < colDimension) {
-//                                               temp.push_back(x1);
-//                                               temp.push_back(y1 + 1);
-
-
-//                                               if (find(bNeighborhood.begin(), bNeighborhood.end(), temp) == bNeighborhood.end()) {
-//                                                 bNeighborhood.push_back(temp);
-//                                               }
-
-//                                               temp.clear();
-//                                             }
-//                                             if (y1 - 1 >= 0) {
-//                                               temp.push_back(x1);
-//                                               temp.push_back(y1 - 1);
-//                                               if (find(bNeighborhood.begin(), bNeighborhood.end(), temp) == bNeighborhood.end()) {
-//                                                 bNeighborhood.push_back(temp);
-//                                               }
-//                                               temp.clear();
-//                                             }
-//                                             if (x1 - 1 >= 0) {
-//                                               temp.push_back(x1 - 1);
-//                                               temp.push_back(y1);
-//                                               if (find(bNeighborhood.begin(), bNeighborhood.end(), temp) == bNeighborhood.end()) {
-//                                                 bNeighborhood.push_back(temp);
-//                                               }
-//                                               temp.clear();
-
-//                                               if (y1 + 1 < colDimension) {
-//                                                 temp.push_back(x1 - 1);
-//                                                 temp.push_back(y1 + 1);
-//                                                 if (find(bNeighborhood.begin(), bNeighborhood.end(), temp) == bNeighborhood.end()) {
-//                                                   bNeighborhood.push_back(temp);
-//                                                 }
-
-//                                                 temp.clear();
-//                                               }
-//                                               if (y1 - 1 >= 0) {
-//                                                 temp.push_back(x1 - 1);
-//                                                 temp.push_back(y1 - 1);
-//                                                 if (find(bNeighborhood.begin(), bNeighborhood.end(), temp) == bNeighborhood.end()) {
-//                                                   bNeighborhood.push_back(temp);
-//                                                 }
-//                                                 temp.clear();
-//                                               }
-//                                             }
-//                                             if (x1 + 1 < rowDimension) {
-//                                               temp.push_back(x1 + 1);
-//                                               temp.push_back(y1);
-//                                               if (find(bNeighborhood.begin(), bNeighborhood.end(), temp) == bNeighborhood.end()) {
-//                                                 bNeighborhood.push_back(temp);
-//                                               }
-//                                               temp.clear();
-
-//                                               if (y1 + 1 < colDimension) {
-//                                                 temp.push_back(x1 + 1);
-//                                                 temp.push_back(y1 + 1);
-//                                                 if (find(bNeighborhood.begin(), bNeighborhood.end(), temp) == bNeighborhood.end()) {
-//                                                   bNeighborhood.push_back(temp);
-//                                                 }
-
-//                                                 temp.clear();
-
-//                                               }
-//                                               if (y1 - 1 >= 0) {
-//                                                 temp.push_back(x1 + 1);
-//                                                 temp.push_back(y1 - 1);
-//                                                 if (find(bNeighborhood.begin(), bNeighborhood.end(), temp) == bNeighborhood.end()) {
-//                                                   bNeighborhood.push_back(temp);
-//                                                 }
-//                                                 temp.clear();
-//                                               }
-//                                             }
-                                
-//                                             //dont double push
-//                                 unmarkedNeighbors.pop_back();
-//                               }
-
+            else if (effectiveLabel == unmarkedNeighbors.size()) {
+                  int sz1 = unmarkedNeighbors.size();
+                  int x1;
+                  int y1;
+                  
+                  
+                  bNeighborhood.pop_back();
               
+              
+                            while (sz1 != 0) {
 
-//               }
-                
-          //} while (effectiveLabel == numMarkedNeighbors && effectiveLabel != 0);
-        
+                                //sz1 = unmarkedNeighbors.size();
+                                x1 = unmarkedNeighbors.at(sz1-1).at(0);
+                                y1 = unmarkedNeighbors.at(sz1-1).at(1);
 
-          
+
+                                board.at(y1).at(x1) = "B";
+// printBoard();
+                                --coveredTilesLeft;
+                                ++mineCount;
+
+                                 //we want to push back the neighborhood of the marked bomb B so we can do Effective Label calculations
+                                //vector<vector<int>> bNeighborhood;
+                                                  
+                                            vector<int> temp;
+
+                                            if (y1 + 1 < rowDimension) {
+                                              temp.push_back(x1);
+                                              temp.push_back(y1 + 1);
+
+
+                                              if (find(bNeighborhood.begin(), bNeighborhood.end(), temp) == bNeighborhood.end()) {
+                                                bNeighborhood.push_back(temp);
+                                              }
+
+                                              temp.clear();
+                                            }
+                                            if (y1 - 1 >= 0) {
+                                              temp.push_back(x1);
+                                              temp.push_back(y1 - 1);
+                                              if (find(bNeighborhood.begin(), bNeighborhood.end(), temp) == bNeighborhood.end()) {
+                                                bNeighborhood.push_back(temp);
+                                              }
+                                              temp.clear();
+                                            }
+                                            if (x1 - 1 >= 0) {
+                                              temp.push_back(x1 - 1);
+                                              temp.push_back(y1);
+                                              if (find(bNeighborhood.begin(), bNeighborhood.end(), temp) == bNeighborhood.end()) {
+                                                bNeighborhood.push_back(temp);
+                                              }
+                                              temp.clear();
+
+                                              if (y1 + 1 < rowDimension) {
+                                                temp.push_back(x1 - 1);
+                                                temp.push_back(y1 + 1);
+                                                if (find(bNeighborhood.begin(), bNeighborhood.end(), temp) == bNeighborhood.end()) {
+                                                  bNeighborhood.push_back(temp);
+                                                }
+
+                                                temp.clear();
+                                              }
+                                              if (y1 - 1 >= 0) {
+                                                temp.push_back(x1 - 1);
+                                                temp.push_back(y1 - 1);
+                                                if (find(bNeighborhood.begin(), bNeighborhood.end(), temp) == bNeighborhood.end()) {
+                                                  bNeighborhood.push_back(temp);
+                                                }
+                                                temp.clear();
+                                              }
+                                            }
+                                            if (x1 + 1 < colDimension) {
+                                              temp.push_back(x1 + 1);
+                                              temp.push_back(y1);
+                                              if (find(bNeighborhood.begin(), bNeighborhood.end(), temp) == bNeighborhood.end()) {
+                                                bNeighborhood.push_back(temp);
+                                              }
+                                              temp.clear();
+
+                                              if (y1 + 1 < rowDimension) {
+                                                temp.push_back(x1 + 1);
+                                                temp.push_back(y1 + 1);
+                                                if (find(bNeighborhood.begin(), bNeighborhood.end(), temp) == bNeighborhood.end()) {
+                                                  bNeighborhood.push_back(temp);
+                                                }
+
+                                                temp.clear();
+
+                                              }
+                                              if (y1 - 1 >= 0) {
+                                                temp.push_back(x1 + 1);
+                                                temp.push_back(y1 - 1);
+                                                if (find(bNeighborhood.begin(), bNeighborhood.end(), temp) == bNeighborhood.end()) {
+                                                  bNeighborhood.push_back(temp);
+                                                }
+                                                temp.clear();
+                                              }
+                                            }
+                                sz1--;
+                              }
+
+               
+              }
+              else {
+                bNeighborhood.pop_back();
+              }
+
         }
-      
-      
-            unmarkedNeighbors.clear();
-
-
-            // The ABOVE is likely to reduce effective labels of other nearby uncovered tiles, 
-            // so that the rules-of-thumb can be fired again)
-            // if (effectiveLabel != numMarkedNeighbors) {
-            //   bNeighborhood.pop_back();
-            // }
-            bNeighborhood.pop_back();
+        else {
+          bNeighborhood.pop_back();
+        }
 
     }
+ 
+    //I think if the loop gets here it means we need to guess
+    //I guess try uncovering all the corners because why not
+    //(THIS LOGIC SUCKS, improvement without it)
+        vector<int> tempGuess;
+    
+        // tempGuess.push_back(0);
+        // tempGuess.push_back(0);
+
+        // if (find(safeUncovered.begin(), safeUncovered.end(), tempGuess) == safeUncovered.end()) {
+        //   safe.push_back(tempGuess);
+        //   safeUncovered.push_back(tempGuess);
+        // }
+        
+        // tempGuess.clear();
+    
+        // tempGuess.push_back(0);
+        // tempGuess.push_back(rowDimension-1);
+    
+        // if (find(safeUncovered.begin(), safeUncovered.end(), tempGuess) == safeUncovered.end()) {
+        //   safe.push_back(tempGuess);
+        //   safeUncovered.push_back(tempGuess);
+        // }
+    
+        // tempGuess.clear();
+    
+        // tempGuess.push_back(rowDimension-1);
+        // tempGuess.push_back(0);
+    
+        // if (find(safeUncovered.begin(), safeUncovered.end(), tempGuess) == safeUncovered.end()) {
+        //   safe.push_back(tempGuess);
+        //   safeUncovered.push_back(tempGuess);
+        // }
+    
+        // tempGuess.clear();
+    
+        // tempGuess.push_back(rowDimension-1);
+        // tempGuess.push_back(rowDimension-1);
+        
+        // if (find(safeUncovered.begin(), safeUncovered.end(), tempGuess) == safeUncovered.end()) {
+        //   safe.push_back(tempGuess);
+        //   safeUncovered.push_back(tempGuess);
+        // }
+    
+        // tempGuess.clear();
+    
+        // //kickstarts uncover process
+        // if (safe.size() != 0) {
+        //   --coveredTilesLeft;
+        //   int sz = safe.size();
+        //   int x = safe.at(sz - 1).at(0);
+        //   int y = safe.at(sz - 1).at(1);
+        //   safe.pop_back();
+        //   agentX = x ;
+        //   agentY = y ;
+        //   return {UNCOVER, x , y };
+        // }
+    
+    //
+    //of the remaining spots, make a (ONE) random guess
+      vector<vector<int>> potentialrandGuess;
+     
+      for (int i = 0; i < board.size(); ++i) {
+        for (int j = 0; j < board.at(i).size(); ++j) {
+          if (board.at(i).at(j) == "*") {
+            //i=y j=x
+            tempGuess.push_back(j);
+            tempGuess.push_back(i);
+            potentialrandGuess.push_back(tempGuess);
+            tempGuess.clear();
+          }
+        }
+      }
+    
+    if (potentialrandGuess.size() != 0) {
+      int randNum = 0 + ( rand() % ( potentialrandGuess.size()-1 - 0 + 1 ) );
+
+        tempGuess.push_back(potentialrandGuess.at(randNum).at(0));//x
+        tempGuess.push_back(potentialrandGuess.at(randNum).at(1));//y
+    
+      if (find(safeUncovered.begin(), safeUncovered.end(), tempGuess) == safeUncovered.end()) {
+        safe.push_back(tempGuess);
+        safeUncovered.push_back(tempGuess);
+      }
+                                        //push back relevant neighborhood of our randomly selected node
+                                                vector<int> temp;
+                      
+                                                int x = potentialrandGuess.at(randNum).at(0);
+                                                int y = potentialrandGuess.at(randNum).at(1);
+                      
+                                                bool relevant1 =  false;
+                                            
+                                                if (y + 1 < rowDimension) {
+                                                  temp.push_back(x);
+                                                  temp.push_back(y + 1);
+                                                  
+                                                  relevant1 = neighborBomb(x, y+1);
+
+                                                  if (relevant1 && find(bNeighborhood.begin(), bNeighborhood.end(), temp) == bNeighborhood.end()) {
+                                                    bNeighborhood.push_back(temp);
+                                                  }
+                                        
+                                                  temp.clear();
+                                                  relevant1 = false;
+                                                }
+                                                if (y - 1 >= 0) {
+                                                  temp.push_back(x);
+                                                  temp.push_back(y - 1);
+                                                  
+                                                  relevant1 = neighborBomb(x, y-1);
+                                                  
+                                                  if (relevant1 && find(bNeighborhood.begin(), bNeighborhood.end(), temp) == bNeighborhood.end()) {
+                                                    bNeighborhood.push_back(temp);
+                                                  }
+                                                  temp.clear();
+                                                  relevant1 = false;
+                                                }
+                                                if (x - 1 >= 0) {
+                                                  temp.push_back(x - 1);
+                                                  temp.push_back(y);
+                                                  
+                                                  relevant1 = neighborBomb(x-1, y);
+                                                  
+                                                  if (relevant1 && find(bNeighborhood.begin(), bNeighborhood.end(), temp) == bNeighborhood.end()) {
+                                                    bNeighborhood.push_back(temp);
+                                                  }
+                                                  temp.clear();
+                                                  relevant1 = false;
+
+                                                  if (y + 1 < rowDimension) {
+                                                    temp.push_back(x - 1);
+                                                    temp.push_back(y + 1);
+                                                    
+                                                    relevant1 = neighborBomb(x-1, y+1);
+                                                    
+                                                    if (relevant1 && find(bNeighborhood.begin(), bNeighborhood.end(), temp) == bNeighborhood.end()) {
+                                                      bNeighborhood.push_back(temp);
+                                                    }
+
+                                                    temp.clear();
+                                                    relevant1 = false;
+                                                  }
+                                                  if (y - 1 >= 0) {
+                                                    temp.push_back(x - 1);
+                                                    temp.push_back(y - 1);
+                                                    
+                                                    relevant1 = neighborBomb(x-1, y-1);
+                                                    
+                                                    if (relevant1 && find(bNeighborhood.begin(), bNeighborhood.end(), temp) == bNeighborhood.end()) {
+                                                      bNeighborhood.push_back(temp);
+                                                    }
+                                                    temp.clear();
+                                                    relevant1 = false;
+                                                  }
+                                                }
+                                                if (x + 1 < colDimension) {
+                                                  temp.push_back(x + 1);
+                                                  temp.push_back(y);
+                                                  
+                                                  relevant1 = neighborBomb(x+1, y);
+                                                  
+                                                  if (relevant1 && find(bNeighborhood.begin(), bNeighborhood.end(), temp) == bNeighborhood.end()) {
+                                                    bNeighborhood.push_back(temp);
+                                                  }
+                                                  temp.clear();
+                                                  relevant1 = false;
+
+                                                  if (y + 1 < rowDimension) {
+                                                    temp.push_back(x + 1);
+                                                    temp.push_back(y + 1);
+                                                    
+                                                    relevant1 = neighborBomb(x+1, y+1);
+                                                    
+                                                    if (relevant1 && find(bNeighborhood.begin(), bNeighborhood.end(), temp) == bNeighborhood.end()) {
+                                                      bNeighborhood.push_back(temp);
+                                                    }
+
+                                                    temp.clear();
+                                                    relevant1 = false;
+
+                                                  }
+                                                  if (y - 1 >= 0) {
+                                                    temp.push_back(x + 1);
+                                                    temp.push_back(y - 1);
+                                                    
+                                                    relevant1 = neighborBomb(x+1, y-1);
+                                                    
+                                                    if (relevant1 && find(bNeighborhood.begin(), bNeighborhood.end(), temp) == bNeighborhood.end()) {
+                                                      bNeighborhood.push_back(temp);
+                                                    }
+                                                    temp.clear();
+                                                    relevant1 = false;
+                                                  }
+                                                }
+           //kickstarts uncover process
+        if (safe.size() != 0) {
+          --coveredTilesLeft;
+          int sz = safe.size();
+          int x = safe.at(sz - 1).at(0);
+          int y = safe.at(sz - 1).at(1);
+          safe.pop_back();
+          agentX = x ;
+          agentY = y ;
+          return {UNCOVER, x , y };
+        }
+    }
+  double seconds_since_start = difftime( time(0), start);
+  total_time_elapsed += seconds_since_start;
+  
+}
 
 }
 
 //calculates effective label given label and x y coordinate
 int MyAI::effectiveLabelCalc(int label, int x1, int y1) {
+  
+    //clears unmarkedNeighbors every time before updating it
+  
+    unmarkedNeighbors.clear();
+  
+  
           vector<int> temp;
         
           int numMarkedNeighbors = 0;
@@ -777,7 +2002,7 @@ int MyAI::effectiveLabelCalc(int label, int x1, int y1) {
           //label remains the same (int label)
           //do {  
                     
-                                                    if (y1 + 1 < colDimension) {
+                                                    if (y1 + 1 < rowDimension) {
 
                                                       if (board.at(y1 + 1).at(x1) == "B") {
                                                         numMarkedNeighbors++;
@@ -815,7 +2040,7 @@ int MyAI::effectiveLabelCalc(int label, int x1, int y1) {
                                                         temp.clear();
                                                       }
 
-                                                      if (y1 + 1 < colDimension) {
+                                                      if (y1 + 1 < rowDimension) {
                                                         if (board.at(y1 + 1).at(x1 - 1) == "B") {
                                                           numMarkedNeighbors++;
                                                         }
@@ -838,7 +2063,7 @@ int MyAI::effectiveLabelCalc(int label, int x1, int y1) {
                                                         }
                                                       }
                                                     }
-                                                    if (x1 + 1 < rowDimension) {
+                                                    if (x1 + 1 < colDimension) {
                                                       if (board.at(y1).at(x1 + 1) == "B") {
                                                         numMarkedNeighbors++;
                                                       }
@@ -849,7 +2074,7 @@ int MyAI::effectiveLabelCalc(int label, int x1, int y1) {
                                                         temp.clear();
                                                       }
 
-                                                      if (y1 + 1 < colDimension) {
+                                                      if (y1 + 1 < rowDimension) {
                                                         if (board.at(y1 + 1).at(x1 + 1) == "B") {
                                                           numMarkedNeighbors++;
                                                         }
@@ -879,21 +2104,82 @@ int MyAI::effectiveLabelCalc(int label, int x1, int y1) {
   return effectiveLabel;
 }
 
+bool MyAI::neighborBomb(int x1, int y1) {
+                    
+                                                    if (y1 + 1 < rowDimension) {
 
+                                                      if (board.at(y1 + 1).at(x1) == "B") {
+                                                        return true;
+                                                      }
+
+
+
+                                                    }
+                                                    if (y1 - 1 >= 0) {
+                                                      if (board.at(y1 - 1).at(x1) == "B") {
+                                                        return true;
+                                                      }
+       
+                                                    }
+                                                    if (x1 - 1 >= 0) {
+                                                      if (board.at(y1).at(x1 - 1) == "B") {
+                                                        return true;
+                                                      }
+                                    
+
+                                                      if (y1 + 1 < rowDimension) {
+                                                        if (board.at(y1 + 1).at(x1 - 1) == "B") {
+                                                          return true;
+                                                        }
+                                               
+                                                      }
+                                                      if (y1 - 1 >= 0) {
+                                                        if (board.at(y1 - 1).at(x1 - 1) == "B") {
+                                                          return true;
+                                                        }
+                                                       
+                                                      }
+                                                    }
+                                                    if (x1 + 1 < colDimension) {
+                                                      if (board.at(y1).at(x1 + 1) == "B") {
+                                                        return true;
+                                                      }
+                                                      
+
+                                                      if (y1 + 1 < rowDimension) {
+                                                        if (board.at(y1 + 1).at(x1 + 1) == "B") {
+                                                          return true;
+                                                        }
+                                                      
+
+                                                      }
+                                                      if (y1 - 1 >= 0) {
+                                                        if (board.at(y1 - 1).at(x1 + 1) == "B") {
+                                                          return true;
+                                                        }
+                                                     
+                                                      }
+                                                    }
+  return false;
+}
 
 //NOTE that the board prints 0 - sz-1 from bottom to top / left to right
 void MyAI::printBoard() {
     cout << "---------------- Game Board ------------------\n" << endl;
     cout << "RowDimension: " << rowDimension << endl << "ColDimension: " << colDimension << endl;
     cout << "Starting X/Y: " << startingX << " " << startingY << endl;
+    //doesn't work for 16x30 aka non nxn
     for (int i = colDimension - 1; i >= 0; i--) {
       for (int j = 0; j < rowDimension; j++) {
+       
         cout << board.at(i).at(j);
       }
       cout << endl;
     }
 
 }
+
+
 
 
 // ======================================================================
@@ -907,3 +2193,19 @@ void MyAI::printBoard() {
     // ======================================================================
     // YOUR CODE ENDS
     // ======================================================================
+
+//Generates 1000 each of beginner, intermediate, and expert worlds
+//sh generateTournament.sh 
+//./Minesweeper -f ~/Minesweeper_Student/WorldGenerator/Problems/
+
+bool MyAI::checkifanystars() {
+    
+  for (int i = 0; i < board.size(); ++i) {
+    for (int j = 0; j < board.at(i).size(); ++j) {
+        if (board.at(i).at(j) == "*") {
+          return false;
+        }
+      }
+    }
+
+}
